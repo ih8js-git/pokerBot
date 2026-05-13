@@ -1,30 +1,32 @@
-from PIL import Image
 import os
 
-def combine_sprites():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    deck_path = os.path.join(base_dir, "8BitDeck_opt2.png")
-    enhancers_path = os.path.join(base_dir, "Enhancers.png")
-    output_path = os.path.join(base_dir, "deck.png")
+from PIL import Image
 
-    deck_img = Image.open(deck_path).convert("RGBA")
-    enhancers_img = Image.open(enhancers_path).convert("RGBA")
 
-    card_width = 142
-    card_height = 190
+def combine_sprites() -> None:
+    base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    deck_path: str = os.path.join(base_dir, "8BitDeck_opt2.png")
+    enhancers_path: str = os.path.join(base_dir, "Enhancers.png")
+    output_path: str = os.path.join(base_dir, "deck.png")
+
+    deck_img: Image.Image = Image.open(deck_path).convert("RGBA")
+    enhancers_img: Image.Image = Image.open(enhancers_path).convert("RGBA")
+
+    CARD_WIDTH: int = 142
+    CARD_HEIGHT: int = 190
 
     # The second background on the first row
-    bg_box = (card_width, 0, card_width * 2, card_height)
-    card_bg = enhancers_img.crop(bg_box)
+    bg_box: tuple[int, int, int, int] = (CARD_WIDTH, 0, CARD_WIDTH * 2, CARD_HEIGHT)
+    card_bg: Image.Image = enhancers_img.crop(bg_box)
 
-    out_img = Image.new("RGBA", deck_img.size)
+    out_img: Image.Image = Image.new("RGBA", deck_img.size)
 
-    cols = 13
-    rows = 4
-    for r in range(rows):
-        for c in range(cols):
-            x = c * card_width
-            y = r * card_height
+    COLS: int = 13
+    ROWS: int = 4
+    for r in range(ROWS):
+        for c in range(COLS):
+            x: int = c * CARD_WIDTH
+            y: int = r * CARD_HEIGHT
             out_img.paste(card_bg, (x, y))
 
     # Paste the original deck over the backgrounds
@@ -32,6 +34,7 @@ def combine_sprites():
 
     out_img.save(output_path)
     print(f"Successfully created {output_path}")
+
 
 if __name__ == "__main__":
     combine_sprites()

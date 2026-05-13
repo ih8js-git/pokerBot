@@ -11,6 +11,7 @@ from database import channel_is_table, update_table_last_message_time
 from helpers import setup_helper_commands
 from poker import setup_poker_commands
 from timer import setup_table_timer
+from ui import setup_poker_ui
 
 load_dotenv()
 
@@ -41,6 +42,7 @@ async def on_ready() -> None:
     # Setup helper commands
     setup_helper_commands(bot)
     setup_poker_commands(bot)
+    setup_poker_ui(bot)
 
     # Setup table timer
     setup_table_timer(bot)
