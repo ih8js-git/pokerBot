@@ -7,7 +7,7 @@ from database import (add_table, add_user_to_table, channel_is_table,
                       user_is_owner_of_table)
 
 try:
-    from poker_engine import generate_hand
+    from poker_engine import Game, generate_hand
 
     HAS_RUST = True
 except ImportError:
@@ -181,17 +181,6 @@ def setup_poker_commands(bot: commands.Bot) -> None:
     @bot.tree.command(name="start", description="Start's the current table")
     async def start(interaction: discord.Interaction) -> None:
         pass
-
-    # Rust test command
-    @bot.tree.command(name="deal", description="Deal a hand using Rust engine")
-    async def deal(interaction: discord.Interaction, cards: int = 5) -> None:
-        if not HAS_RUST:
-            await interaction.response.send_message(
-                "Rust engine not loaded. Build it with `maturin develop` in poker-engine/"
-            )
-            return
-        hand = generate_hand(cards)
-        await interaction.response.send_message(f"🃏 Your hand: {' '.join(hand)}")
 
     # Actions
     @bot.tree.command(name="check", description="Check's the current table")

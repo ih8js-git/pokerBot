@@ -1,10 +1,22 @@
 import io
 import os
-import random
+from typing import Any
 
 import discord
 from discord.ext import commands
 from PIL import Image
+
+try:
+    from poker_engine import Game
+
+    HAS_RUST = True
+except ImportError:
+    HAS_RUST = False
+
+
+def card_to_tuple(card: Any) -> tuple[str, str]:
+    """Convert a Rust Card to a (rank, suit) tuple for the sprite sheet."""
+    return (str(card.rank), str(card.suit))
 
 
 def generate_card_image(cards: list[tuple[str, str]], filename: str) -> discord.File:
@@ -34,7 +46,6 @@ def generate_card_image(cards: list[tuple[str, str]], filename: str) -> discord.
         x_offset: int = ranks.index(rank) * CARD_WIDTH
         return x_offset, y_offset
 
-    # I should really update this to be like resources/deck.png but I'll do that later
     base_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     deck_path: str = os.path.join(base_dir, "deck.png")
 
@@ -65,29 +76,18 @@ def generate_card_image(cards: list[tuple[str, str]], filename: str) -> discord.
 def setup_poker_ui(bot: commands.Bot) -> None:
     """Setup all poker UI for the bot"""
 
-    suits: list[str] = ["Hearts", "Clubs", "Diamonds", "Spades"]
-    ranks: list[str] = [
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "J",
-        "Q",
-        "K",
-        "A",
-    ]
-    full_deck: list[tuple[str, str]] = [
-        (rank, suit) for suit in suits for rank in ranks
-    ]
-
     @bot.tree.command(name="hand", description="Show your hand")
     async def hand(interaction: discord.Interaction) -> None:
-        hand_cards: list[tuple[str, str]] = random.sample(full_deck, 2)
+        if not HAS_RUST:
+            await interaction.response.send_message(
+                "Rust engine not loaded.", ephemeral=True
+            )
+            return
+
+        game = Game()
+        game.deal_hole_cards(1)
+        player = game.get_players()[0]
+        hand_cards: list[tuple[str, str]] = [card_to_tuple(c) for c in player.hand]
 
         try:
             file: discord.File = generate_card_image(hand_cards, "hand.png")
@@ -99,7 +99,17 @@ def setup_poker_ui(bot: commands.Bot) -> None:
 
     @bot.tree.command(name="community", description="Show the community cards")
     async def community(interaction: discord.Interaction) -> None:
-        community_cards: list[tuple[str, str]] = random.sample(full_deck, 5)
+        if not HAS_RUST:
+            await interaction.response.send_message(
+                "Rust engine not loaded.", ephemeral=True
+            )
+            return
+
+        game = Game()
+        community_cards_raw = game.deal_community(5)
+        community_cards: list[tuple[str, str]] = [
+            card_to_tuple(c) for c in community_cards_raw
+        ]
 
         try:
             file: discord.File = generate_card_image(community_cards, "community.png")
