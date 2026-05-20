@@ -4,15 +4,18 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "discord>=2.3.2",
-    "dotenv>=0.9.9",
-    "pillow>=12.2.0",
-]
+dependencies = ["discord>=2.3.2", "dotenv>=0.9.9", "pillow>=12.2.0"]
+
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+manifest-path = "../poker-engine/Cargo.toml"
+
+[[tool.mypy.overrides]]
+module = "poker_engine"
+ignore_missing_imports = true
 
 [dependency-groups]
-dev = [
-    "black>=25.1.0",
-    "isort>=6.0.1",
-    "mypy>=1.17.0",
-]
+dev = ["black>=25.1.0", "isort>=6.0.1", "mypy>=1.17.0", "maturin>=1.8"]
